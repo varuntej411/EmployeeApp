@@ -1,0 +1,2 @@
+#Initially there will be textfield to enter some filter value as integer to get call api of results after enter some value click on search icon from textfield it will trigger the api for list of users.
+# when user clicks on particular card it will navigate to details screen.
