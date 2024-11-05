@@ -9,7 +9,7 @@ interface APIServices {
 
     @GET("api/")
     suspend fun getEmployeesList(
-        @Query("results") result: String
+        @Query("results") result: Int
     ): Response<EmployeesResponse>
 
 }

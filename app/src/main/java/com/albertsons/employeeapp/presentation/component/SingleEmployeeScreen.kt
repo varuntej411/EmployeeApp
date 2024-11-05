@@ -17,13 +17,13 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -31,6 +31,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.albertsons.employeeapp.data.responses.Dob
@@ -40,21 +41,20 @@ import com.albertsons.employeeapp.data.responses.Picture
 import com.albertsons.employeeapp.data.responses.Street
 import com.albertsons.employeeapp.data.responses.User
 import com.albertsons.employeeapp.presentation.nav_graph.Route
-import com.albertsons.employeeapp.utils.LoadAsyncImage
+import com.albertsons.employeeapp.utils.LoadCircularImage
 import com.albertsons.employeeapp.utils.MultiPreviewWindow
+import com.albertsons.employeeapp.utils.SharedViewModel
 
 @Composable
 fun SingleEmployeeScreen(
     result: User,
-    navController: NavHostController
+    navController: NavHostController,
+    sharedViewModel: SharedViewModel = viewModel()
 ) {
-
-    val context = LocalContext.current
-
     Card(
         modifier = Modifier
             .fillMaxSize()
-            .padding(8.dp),
+            .padding(10.dp),
         colors = CardDefaults.elevatedCardColors(
             containerColor = Color.White,
             contentColor = Color.Red,
@@ -70,26 +70,23 @@ fun SingleEmployeeScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp),
-            ) {
-                LoadAsyncImage(
-                    result.picture.thumbnail,
-                    context = context
-                )
-            }
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.3f),
+                ) {
+                    LoadCircularImage(
+                        imageUrl = result.picture.thumbnail
+                    )
+                }
 
                 Column(
-                    modifier = Modifier.fillMaxWidth(0.8f),
-                    verticalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth(0.7f),
+                    verticalArrangement = Arrangement.SpaceAround,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Spacer(modifier = Modifier.height(10.dp))
@@ -99,7 +96,7 @@ fun SingleEmployeeScreen(
                     Text(
                         text = fullName,
                         color = MaterialTheme.colorScheme.primary,
-                        fontSize = 18.sp,
+                        fontSize = 16.sp,
                         fontStyle = FontStyle.Normal,
                         fontFamily = FontFamily.SansSerif,
                         fontWeight = FontWeight.ExtraBold,
@@ -108,7 +105,7 @@ fun SingleEmployeeScreen(
                             .padding(2.dp),
                         textAlign = TextAlign.Start,
                         style = MaterialTheme.typography.headlineLarge,
-                        maxLines = 1,
+                        maxLines = 2,
                         minLines = 1,
                         softWrap = true,
                         overflow = TextOverflow.Ellipsis
@@ -116,7 +113,7 @@ fun SingleEmployeeScreen(
                     Text(
                         text = result.location.city + ", " + result.location.country,
                         color = MaterialTheme.colorScheme.primary,
-                        fontSize = 16.sp,
+                        fontSize = 14.sp,
                         fontStyle = FontStyle.Normal,
                         fontFamily = FontFamily.Serif,
                         fontWeight = FontWeight.SemiBold,
@@ -125,7 +122,7 @@ fun SingleEmployeeScreen(
                             .fillMaxWidth()
                             .padding(2.dp),
                         textAlign = TextAlign.Start,
-                        maxLines = 1,
+                        maxLines = 2,
                         minLines = 1,
                         softWrap = true,
                         overflow = TextOverflow.Ellipsis
@@ -138,8 +135,11 @@ fun SingleEmployeeScreen(
                         .width(50.dp)
                         .height(50.dp),
                     onClick = {
+                        sharedViewModel.user = result
                         navController.navigate(Route.MoreDetailsScreen.screen)
-                    }
+                    },
+                    enabled = true,
+                    colors = IconButtonDefaults.filledIconButtonColors()
                 ) {
                     Icon(
                         imageVector = Icons.Filled.KeyboardArrowRight,

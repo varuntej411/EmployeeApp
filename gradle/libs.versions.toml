@@ -31,7 +31,6 @@ kspVersion = "2.0.0-1.0.22"
 roomPagingGuava = "2.7.0-alpha11"
 roomKtx = "2.6.1"
 kotlinxCoroutines = "1.9.0"
-kotlinxCoroutinesTest = "1.6.0"
 datastore_preference = "1.1.1"
 pagingRuntime = "3.3.2"
 pagingCompose = "3.3.2"
@@ -42,7 +41,7 @@ viewpagerVersion = "1.1.0"
 junitJunit = "4.13.2"
 junitJupiter = "5.8.2"
 junitJupiterVersion = "5.8.2"
-
+coreTesting = "2.2.0"
 
 [libraries]
 # Accompanist
@@ -112,7 +111,9 @@ androidx-viewpager2 ={group="androidx.viewpager2", name= "viewpager2", version.r
 kotlinx-serialisation-json = { group ="org.jetbrains.kotlinx", name ="kotlinx-serialization-json", version.ref = "kotlinxjsonSerialization" }
 junit-junit = { group = "junit", name = "junit", version.ref = "junitJunit" }
 junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junitJupiter" }
-kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }
+androidx-core-testing = { module = "androidx.arch.core:core-testing", version.ref = "coreTesting" }
+
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "library" }

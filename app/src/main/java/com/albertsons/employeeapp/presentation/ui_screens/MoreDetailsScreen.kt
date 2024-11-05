@@ -1,6 +1,7 @@
 package com.albertsons.employeeapp.presentation.ui_screens
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -8,11 +9,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.sharp.ArrowBack
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -28,11 +26,14 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.albertsons.employeeapp.presentation.EmployeesListViewModel
+import com.albertsons.employeeapp.data.responses.Dob
+import com.albertsons.employeeapp.data.responses.Location
+import com.albertsons.employeeapp.data.responses.Name
+import com.albertsons.employeeapp.data.responses.Picture
+import com.albertsons.employeeapp.data.responses.Street
+import com.albertsons.employeeapp.data.responses.User
 import com.albertsons.employeeapp.utils.MultiPreviewWindow
 import com.albertsons.employeeapp.utils.RectangularImage
 
@@ -40,7 +41,7 @@ import com.albertsons.employeeapp.utils.RectangularImage
 fun MoreDetailsScreen(
     navController: NavHostController,
     contentPaddingValues: PaddingValues,
-    viewModel: EmployeesListViewModel = hiltViewModel()
+    user: User?
 ) {
 
     val context = LocalContext.current
@@ -52,11 +53,8 @@ fun MoreDetailsScreen(
         contentColor = Color.White
     ) {
 
-        val uiState = viewModel.uiStates.collectAsStateWithLifecycle()
-
-
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize().padding(4.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -76,8 +74,9 @@ fun MoreDetailsScreen(
                         tint = Color.Black
                     )
                 }
+                val name = user?.name?.first + " " + user?.name?.last
                 Text(
-                    text = uiState.value.data?.results?.first()?.name?.title.toString(),
+                    text = name,
                     color = Color.Black,
                     modifier = Modifier.padding(10.dp),
                     style = MaterialTheme.typography.titleLarge,
@@ -86,27 +85,19 @@ fun MoreDetailsScreen(
                     fontFamily = FontFamily.Serif
                 )
             }
-            uiState.value.data?.let {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(320.dp)
-                        .padding(10.dp),
-                    colors = CardDefaults.cardColors(
-                        contentColor = MaterialTheme.colorScheme.onSecondary,
-                        containerColor = Color.Transparent
-                    ),
-                    shape = RoundedCornerShape(32.dp)
-                ) {
-                    RectangularImage(
-                        imageUrl = "${it.results?.first()?.picture?.medium}",
-                        context = context
-                    )
-                }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(300.dp)
+            ) {
+                RectangularImage(
+                    imageUrl = user?.picture?.medium.toString(),
+                    context = context
+                )
             }
 
-            val fullName =
-                uiState.value.data?.results?.first()?.name?.title + ". " + uiState.value.data?.results?.first()?.name?.first + " " + uiState.value.data?.results?.first()?.name?.last
+            val fullName = user?.name?.title + ". " + user?.name?.first + " " + user?.name?.last
             Text(
                 text = fullName,
                 style = MaterialTheme.typography.bodyMedium,
@@ -122,7 +113,7 @@ fun MoreDetailsScreen(
                 fontFamily = FontFamily.Serif
             )
             Text(
-                text = "Age: ${uiState.value.data?.results?.first()?.dob?.age}",
+                text = "Age: ${user?.dob?.age}",
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color.Black,
                 modifier = Modifier
@@ -136,7 +127,7 @@ fun MoreDetailsScreen(
                 fontFamily = FontFamily.Serif
             )
             Text(
-                text = "Gender: ${uiState.value.data?.results?.first()?.gender}",
+                text = "Gender: ${user?.gender}",
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color.Black,
                 modifier = Modifier
@@ -160,6 +151,35 @@ fun MoreDetailsScreen(
 fun PreviewMoreDetailsScreen() {
     MoreDetailsScreen(
         navController = rememberNavController(),
-        contentPaddingValues = PaddingValues()
+        contentPaddingValues = PaddingValues(),
+        user = User(
+            name = Name(
+                first = "varun",
+                last = "tej",
+                title = "Software Engineer"
+            ),
+            gender = "male",
+            location = Location(
+                city = "hyderabad",
+                country = "india",
+                state = "telangana",
+                street = Street(
+                    name = "hitech city",
+                    number = 2
+                ),
+            ),
+            email = "",
+            dob = Dob("25/05/1994", 20),
+            phone = "",
+            picture = Picture(
+                large = "https://randomuser.me/api/portraits/women/35.jpg",
+                medium = "https://randomuser.me/api/portraits/med/women/35.jpg",
+                thumbnail = "https://randomuser.me/api/portraits/thumb/women/35.jpg"
+            ),
+            city = "hitech City",
+            state = "Telangana",
+            country = "India",
+            postcode = "500081"
+        )
     )
 }

@@ -118,6 +118,7 @@ dependencies {
     testImplementation(libs.mockwebserver)
     testImplementation(libs.androidx.core.test)
     testImplementation(libs.androidx.mock.test)
+    testImplementation(libs.androidx.core.testing)
     testImplementation(libs.androidx.mockito.core)
     testImplementation(libs.androidx.mockito.kotlin)
     testImplementation(libs.kotlinx.coroutines.test)

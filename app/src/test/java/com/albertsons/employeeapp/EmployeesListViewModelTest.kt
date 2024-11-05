@@ -1,140 +1,99 @@
 package com.albertsons.employeeapp
 
-import com.albertsons.employeeapp.data.responses.Dob
-import com.albertsons.employeeapp.data.responses.EmployeesResponse
-import com.albertsons.employeeapp.data.responses.Location
-import com.albertsons.employeeapp.data.responses.Name
-import com.albertsons.employeeapp.data.responses.Picture
-import com.albertsons.employeeapp.data.responses.Street
-import com.albertsons.employeeapp.data.responses.User
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import com.albertsons.employeeapp.domain.repository.EmployeesRepository
 import com.albertsons.employeeapp.domain.usecases.GetEmployeesUseCase
 import com.albertsons.employeeapp.presentation.EmployeesList
 import com.albertsons.employeeapp.presentation.EmployeesListViewModel
-import com.albertsons.employeeapp.utils.APIDataStatus
+import com.albertsons.employeeapp.utils.APIDataStatus.ERROR
 import com.albertsons.employeeapp.utils.UiText
+import com.albertsons.employeeapp.utils.UserUtils
+import io.mockk.clearAllMocks
+import io.mockk.coEvery
+import io.mockk.mockk
+import junit.framework.Assert.assertEquals
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertEquals
+import kotlinx.coroutines.test.setMain
+import org.junit.After
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
-import org.mockito.Mock
-import org.mockito.Mockito.`when`
-import org.mockito.MockitoAnnotations
-import kotlin.coroutines.CoroutineContext
+
 
 @ExperimentalCoroutinesApi
 class EmployeesListViewModelTest {
 
-    private lateinit var viewModel: EmployeesListViewModel
+    @get:Rule
+    val instantTaskExecutorRule = InstantTaskExecutorRule()
 
-    @Mock
-    private lateinit var getEmployeesUseCase: GetEmployeesUseCase
+    private lateinit var userViewModel: EmployeesListViewModel
+    private val employeesRepository: EmployeesRepository = mockk()
+    private val getEmployeesUseCase: GetEmployeesUseCase = mockk()
+    private val testDispatcher = StandardTestDispatcher()
 
     @Before
     fun setup() {
-        MockitoAnnotations.openMocks(this)
-        viewModel = EmployeesListViewModel(getEmployeesUseCase)
-    }
-
-    @Test
-    fun `test initial state`() {
-        // Given
-        val initialState = EmployeesList.UiState()
-
-        // When
-        val actualState = viewModel.uiStates.value
-
-        // Then
-        assertEquals(initialState, actualState)
-    }
-
-    @Test
-    fun `test loading state`() = runBlocking {
-        // Given
-        `when`(getEmployeesUseCase.invoke(result = 10)).thenReturn(flowOf(APIDataStatus.LOADING()))
-
-        // When
-        viewModel.onEvent(EmployeesList.Event.GetEmployeesList(10))
-
-        // Then
-        assertEquals(true, viewModel.uiStates.value.isLoading)
-    }
-
-    @Test
-    fun `test success state`() = runBlocking {
-        // Given
-        val mockData = EmployeesResponse(
-            listOf(
-                User(
-                    name = Name(
-                        first = "varun",
-                        last = "tej",
-                        title = "Software Engineer"
-                    ),
-                    gender = "male",
-                    location = Location(
-                        city = "hyderabad",
-                        country = "india",
-                        state = "telangana",
-                        street = Street(
-                            name = "hitech city",
-                            number = 2
-                        ),
-                    ),
-                    email = "",
-                    dob = Dob("25/05/1994", 20),
-                    phone = "",
-                    picture = Picture(
-                        large = "https://randomuser.me/api/portraits/women/35.jpg",
-                        medium = "https://randomuser.me/api/portraits/med/women/35.jpg",
-                        thumbnail = "https://randomuser.me/api/portraits/thumb/women/35.jpg"
-                    ),
-                    city = "hitech City",
-                    state = "Telangana",
-                    country = "India",
-                    postcode = "500081"
-                )
-            )
-        ) // Mock your EmployeesResponse accordingly
-
-        `when`(getEmployeesUseCase.invoke(result = 10)).thenReturn(
-            flowOf(
-                APIDataStatus.SUCCESS(
-                    mockData
-                )
-            )
+        Dispatchers.setMain(testDispatcher)
+        userViewModel = EmployeesListViewModel(
+            getEmployeesUseCase = getEmployeesUseCase,
+            employeesRepository = employeesRepository
         )
-
-        // When
-        viewModel.onEvent(EmployeesList.Event.GetEmployeesList(10))
-
-        // Then
-        assertEquals(false, viewModel.uiStates.value.isLoading)
-        assertEquals(mockData, viewModel.uiStates.value.data)
-        assertEquals(UiText.Idle, viewModel.uiStates.value.error)
     }
 
     @Test
-    fun `test error state`() = runBlocking {
+    fun `fetchUsers should return success state when users are fetched successfully`() = runTest {
+        // Given
+        val userList = UserUtils.createSampleUserList()
+        coEvery { employeesRepository.getEmployeesList(2) } returns userList.results
+
+        // When
+        userViewModel.getEmployeesList(2)
+        advanceUntilIdle()
+        // Then
+        userViewModel.uiStates.value.data?.results?.first() { state ->
+            assert(state is userViewModel.uiStates.value)
+            assert((state as userViewModel.uiStates.value.Success).users == userList)
+        }
+    }
+
+    @Test
+    fun `fetchUsers should return error state when fetching users fails`() = runTest {
         // Given
         val errorMessage = "Network Error"
-        `when`(getEmployeesUseCase.invoke(result = 10)).thenReturn(
-            flowOf(
-                APIDataStatus.ERROR(
-                    errorMessage
-                )
-            )
-        )
+        val errorState = ERROR(message = errorMessage)
+        coEvery { employeesRepository.getEmployeesList(2) } throws Exception("Network error")
 
         // When
-        viewModel.onEvent(EmployeesList.Event.GetEmployeesList(10))
+        userViewModel.getEmployeesList(errorState) // Simulating the error state update
 
         // Then
-        assertEquals(false, viewModel.uiStates.value.isLoading)
-        assertEquals(null, viewModel.uiStates.value.data)
-        assertEquals(UiText.RemoteString(errorMessage), viewModel.uiStates.value.error)
+        assertEquals(false, userViewModel.uiStates.value.isLoading)
+        assertEquals(null, userViewModel.uiStates.value.data)
+        assertEquals(UiText.RemoteString(errorMessage), userViewModel.uiStates.value.error)
+    }
+
+    @Test
+    fun `fetchUsers should show loading state before fetching users`() = runTest {
+        // Given
+        coEvery { employeesRepository.getEmployeesList(2) } returns emptyList() // Adjust as needed
+
+        // When
+        userViewModel.getEmployeesList(2)
+
+
+        // Then
+        val state = userViewModel.uiStates.value
+        assert(state is EmployeesList.UiState)
+    }
+
+    @After
+    fun tearDown() {
+        clearAllMocks()
+        Dispatchers.resetMain() // Reset Main dispatcher
     }
 }

@@ -3,6 +3,7 @@ package com.albertsons.employeeapp.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.albertsons.employeeapp.data.responses.EmployeesResponse
+import com.albertsons.employeeapp.domain.repository.EmployeesRepository
 import com.albertsons.employeeapp.domain.usecases.GetEmployeesUseCase
 import com.albertsons.employeeapp.utils.APIDataStatus
 import com.albertsons.employeeapp.utils.UiText
@@ -20,27 +21,27 @@ import javax.inject.Inject
 
 @HiltViewModel
 class EmployeesListViewModel @Inject constructor(
-    private val getEmployeesUseCase: GetEmployeesUseCase
+    private val getEmployeesUseCase: GetEmployeesUseCase,
+    val employeesRepository: EmployeesRepository
 ) : ViewModel() {
 
-    private val _uiStates = MutableStateFlow(EmployeesList.UiState())
+    val _uiStates = MutableStateFlow(EmployeesList.UiState())
     var uiStates: StateFlow<EmployeesList.UiState> = _uiStates.asStateFlow()
 
-    private val result = 10
 
-    init {
-        getEmployeesList()
+   /* init {
+        getEmployeesList(10)
     }
-
+*/
     fun onEvent(event: EmployeesList.Event) {
         when (event) {
             is EmployeesList.Event.GetEmployeesList -> {
-                getEmployeesList()
+                getEmployeesList(event.results)
             }
         }
     }
 
-    private fun getEmployeesList() = getEmployeesUseCase.invoke(result = result).onEach { result ->
+    fun getEmployeesList(results: Int) = getEmployeesUseCase.invoke(result = results).onEach { result ->
 
         when (result) {
             is APIDataStatus.LOADING -> {

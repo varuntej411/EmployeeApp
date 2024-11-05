@@ -3,6 +3,7 @@ package com.albertsons.employeeapp.utils
 import android.content.Context
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
@@ -63,7 +64,7 @@ fun LoadAsyncImage(imageUrl: String, context: Context) {
 }
 
 @Composable
-fun LoadCircularImage(imageUrl: String, context: Context) {
+fun LoadCircularImage(imageUrl: String) {
     SubcomposeAsyncImage(
         modifier = Modifier
             .width(100.dp)
@@ -92,8 +93,7 @@ fun CustomProgressBarForAsyncImage() {
 fun RectangularImage(imageUrl: String, context: Context) {
     SubcomposeAsyncImage(
         modifier = Modifier
-            .width(300.dp)
-            .height(300.dp)
+            .fillMaxSize()
             .clip(RoundedCornerShape(5.dp)),
 
         model = ImageRequest.Builder(context).data(imageUrl).build(),

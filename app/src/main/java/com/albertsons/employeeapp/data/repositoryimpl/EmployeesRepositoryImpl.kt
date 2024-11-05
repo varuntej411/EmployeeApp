@@ -11,7 +11,7 @@ class EmployeesRepositoryImpl @Inject constructor(
 
     override suspend fun getEmployeesList(result: Int): Result<EmployeesResponse> {
         return try {
-            val response = apiServices.getEmployeesList(result = result.toString())
+            val response = apiServices.getEmployeesList(result = result)
             if (response.isSuccessful) {
                 response.body()?.let {
                     Result.success(it)
